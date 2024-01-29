@@ -40,6 +40,7 @@ import "package:pointycastle/srp/srp6_standard_groups.dart";
 import "package:pointycastle/srp/srp6_util.dart";
 import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import "package:uuid/uuid.dart";
 
 class UserService {
@@ -262,6 +263,10 @@ class UserService {
       _logger.severe(e);
       rethrow;
     }
+  }
+
+  Future<void> acceptPasskey(Map response) async {
+    await _saveConfiguration(response);
   }
 
   Future<void> verifyEmail(
@@ -580,11 +585,17 @@ class UserService {
       },
     );
     if (response.statusCode == 200) {
-      Widget page;
+      Widget? page;
+      final String passkeySessionID = response.data["passkeySessionID"];
       final String twoFASessionID = response.data["twoFactorSessionID"];
       Configuration.instance.setVolatilePassword(userPassword);
       if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
+      } else if (passkeySessionID.isNotEmpty) {
+        launchUrlString(
+          "https://accounts.ente.io/passkeys/flow?passkeySessionID=$passkeySessionID&redirect=enteauth://passkey",
+          mode: LaunchMode.externalApplication,
+        );
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {
@@ -599,14 +610,16 @@ class UserService {
         }
       }
       await dialog.hide();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return page;
-          },
-        ),
-        (route) => route.isFirst,
-      );
+      if (page != null) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page!;
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      }
     } else {
       // should never reach here
       throw Exception("unexpected response during email verification");
@@ -860,16 +873,19 @@ class UserService {
     }
   }
 
-  Future<void> _saveConfiguration(Response response) async {
-    await Configuration.instance.setUserID(response.data["id"]);
-    if (response.data["encryptedToken"] != null) {
+  Future<void> _saveConfiguration(dynamic response) async {
+    final responseData = response is Map ? response : response.data as Map?;
+    if (responseData == null) return;
+
+    await Configuration.instance.setUserID(responseData["id"]);
+    if (responseData["encryptedToken"] != null) {
       await Configuration.instance
-          .setEncryptedToken(response.data["encryptedToken"]);
+          .setEncryptedToken(responseData["encryptedToken"]);
       await Configuration.instance.setKeyAttributes(
-        KeyAttributes.fromMap(response.data["keyAttributes"]),
+        KeyAttributes.fromMap(responseData["keyAttributes"]),
       );
     } else {
-      await Configuration.instance.setToken(response.data["token"]);
+      await Configuration.instance.setToken(responseData["token"]);
     }
   }
 
