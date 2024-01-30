@@ -108,7 +108,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async => await launchUrlString(
+          onTap: () => launchUrlString(
             "https://accounts.ente.io",
             mode: LaunchMode.externalApplication,
           ),
