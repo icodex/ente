@@ -1,5 +1,3 @@
-
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -115,6 +113,7 @@ class AccountSectionWidget extends StatelessWidget {
       children: children,
     );
   }
+
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,

@@ -21,6 +21,7 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -98,6 +99,19 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               );
             }
           },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.passkey,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => await launchUrlString(
+            "https://accounts.ente.io",
+            mode: LaunchMode.externalApplication,
+          ),
         ),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
