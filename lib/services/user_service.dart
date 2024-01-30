@@ -26,6 +26,7 @@ import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/common/progress_dialog.dart';
 import 'package:ente_auth/ui/home_page.dart';
+import 'package:ente_auth/ui/passkey_page.dart';
 import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/ui/two_factor_recovery_page.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
@@ -40,7 +41,6 @@ import "package:pointycastle/srp/srp6_standard_groups.dart";
 import "package:pointycastle/srp/srp6_util.dart";
 import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import "package:uuid/uuid.dart";
 
 class UserService {
@@ -265,8 +265,34 @@ class UserService {
     }
   }
 
-  Future<void> acceptPasskey(Map response) async {
+  Future<void> acceptPasskey(
+    BuildContext context,
+    Map response,
+    String userPassword,
+    Uint8List keyEncryptionKey,
+  ) async {
     await _saveConfiguration(response);
+
+    Widget page;
+    if (Configuration.instance.getEncryptedToken() != null) {
+      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+        userPassword,
+        Configuration.instance.getKeyAttributes()!,
+        keyEncryptionKey: keyEncryptionKey,
+      );
+      page = const HomePage();
+    } else {
+      throw Exception("unexpected response during email verification");
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
+        },
+      ),
+      (route) => route.isFirst,
+    );
   }
 
   Future<void> verifyEmail(
@@ -592,9 +618,10 @@ class UserService {
       if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
       } else if (passkeySessionID.isNotEmpty) {
-        launchUrlString(
-          "https://accounts.ente.io/passkeys/flow?passkeySessionID=$passkeySessionID&redirect=enteauth://passkey",
-          mode: LaunchMode.externalApplication,
+        page = PasskeyPage(
+          passkeySessionID,
+          userPassword: userPassword,
+          keyEncryptionKey: keyEncryptionKey,
         );
       } else {
         await _saveConfiguration(response);
@@ -610,16 +637,14 @@ class UserService {
         }
       }
       await dialog.hide();
-      if (page != null) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page!;
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      }
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return page!;
+          },
+        ),
+        (route) => route.isFirst,
+      );
     } else {
       // should never reach here
       throw Exception("unexpected response during email verification");

@@ -7,7 +7,6 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
-import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
@@ -24,10 +23,7 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
-import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:logging/logging.dart';
-import 'package:uni_links/uni_links.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({Key? key}) : super(key: key);
@@ -38,7 +34,6 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   late StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
-  final Logger _logger = Logger("OnboardingPage");
 
   @override
   void initState() {
@@ -46,58 +41,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
     });
-    _initDeepLinks();
     super.initState();
-  }
-
-  void _handleDeeplink(BuildContext context, String? link) {
-    if (!Configuration.instance.hasConfiguredAccount() || link == null) {
-      return;
-    }
-    if (mounted && link.toLowerCase().startsWith("enteauth://passkey")) {
-      final res = <String, dynamic>{};
-      final uri = Uri.parse(link).queryParameters['response'];
-
-      // response to json
-      final json = Uri.decodeComponent(uri!);
-      final split = json.split("&");
-      for (final s in split) {
-        final kv = s.split("=");
-        res[kv[0]] = kv[1];
-      }
-
-      UserService.instance.acceptPasskey(res);
-    }
-  }
-
-  Future<bool> _initDeepLinks() async {
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      final String? initialLink = await getInitialLink();
-      // Parse the link and warn the user, if it is not correct,
-      // but keep in mind it could be `null`.
-      if (initialLink != null) {
-        _handleDeeplink(context, initialLink);
-        return true;
-      } else {
-        _logger.info("No initial link received.");
-      }
-    } on PlatformException {
-      // Handle exception by warning the user their action did not succeed
-      // return?
-      _logger.severe("PlatformException thrown while getting initial link");
-    }
-
-    // Attach a listener to the stream
-    linkStream.listen(
-      (String? link) {
-        _handleDeeplink(context, link);
-      },
-      onError: (err) {
-        _logger.severe(err);
-      },
-    );
-    return false;
   }
 
   @override
