@@ -314,8 +314,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     onChanged: (cnfPassword) {
                       setState(() {
                         _passwordInInputConfirmationBox = cnfPassword;
-                        if (_passwordInInputBox != null ||
-                            _passwordInInputBox != '') {
+                        if (_passwordInInputBox.isNotEmpty) {
                           _passwordsMatch = _passwordInInputBox ==
                               _passwordInInputConfirmationBox;
                         }

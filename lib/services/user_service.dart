@@ -275,6 +275,10 @@ class UserService {
 
     Widget page;
     if (Configuration.instance.getEncryptedToken() != null) {
+      // print(userPassword);
+      // print(base64.encode(keyEncryptionKey));
+      // print(response);
+      // print(Configuration.instance.getKeyAttributes()!);
       await Configuration.instance.decryptSecretsAndGetKeyEncKey(
         userPassword,
         Configuration.instance.getKeyAttributes()!,
@@ -282,7 +286,7 @@ class UserService {
       );
       page = const HomePage();
     } else {
-      throw Exception("unexpected response during email verification");
+      throw Exception("unexpected response during passkey verification");
     }
 
     Navigator.of(context).pushAndRemoveUntil(
@@ -517,9 +521,9 @@ class UserService {
         // ignore: need to calculate secret to get M1, unused_local_variable
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
-        late Response srpCompleteResponse;
+        late Response _;
         if (setKeysRequest == null) {
-          srpCompleteResponse = await _enteDio.post(
+          _ = await _enteDio.post(
             "/users/srp/complete",
             data: {
               'setupID': setupSRPResponse.setupID,
@@ -527,7 +531,7 @@ class UserService {
             },
           );
         } else {
-          srpCompleteResponse = await _enteDio.post(
+          _ = await _enteDio.post(
             "/users/srp/update",
             data: {
               'setupID': setupSRPResponse.setupID,

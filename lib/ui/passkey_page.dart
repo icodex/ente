@@ -50,9 +50,9 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<void> _handleDeeplink(String? link) async {
-    if (Configuration.instance.hasConfiguredAccount() ||
-        link == null ||
-        !context.mounted) {
+    if (!context.mounted ||
+        Configuration.instance.hasConfiguredAccount() ||
+        link == null) {
       return;
     }
     if (mounted && link.toLowerCase().startsWith("enteauth://passkey")) {
@@ -72,23 +72,6 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<bool> _initDeepLinks() async {
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      final String? initialLink = await getInitialLink();
-      // Parse the link and warn the user, if it is not correct,
-      // but keep in mind it could be `null`.
-      if (initialLink != null) {
-        _handleDeeplink(initialLink);
-        return true;
-      } else {
-        _logger.info("No initial link received.");
-      }
-    } on PlatformException {
-      // Handle exception by warning the user their action did not succeed
-      // return?
-      _logger.severe("PlatformException thrown while getting initial link");
-    }
-
     // Attach a listener to the stream
     linkStream.listen(
       _handleDeeplink,
@@ -105,7 +88,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          l10n.twoFactorAuthTitle,
+          l10n.passkeyAuthTitle,
         ),
       ),
       body: _getBody(),

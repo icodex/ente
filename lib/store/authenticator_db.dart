@@ -166,7 +166,7 @@ class AuthenticatorDB {
         batch.delete(entityTable, where: whereID, whereArgs: [id]);
       }
     }
-    final result = await batch.commit();
+    final _ = await batch.commit();
     debugPrint("Done");
   }
 
