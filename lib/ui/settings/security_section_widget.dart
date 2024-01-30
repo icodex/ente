@@ -113,6 +113,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             mode: LaunchMode.externalApplication,
           ),
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.emailVerificationToggle,
