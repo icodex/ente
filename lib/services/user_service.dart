@@ -275,10 +275,6 @@ class UserService {
 
     Widget page;
     if (Configuration.instance.getEncryptedToken() != null) {
-      // print(userPassword);
-      // print(base64.encode(keyEncryptionKey));
-      // print(response);
-      // print(Configuration.instance.getKeyAttributes()!);
       await Configuration.instance.decryptSecretsAndGetKeyEncKey(
         userPassword,
         Configuration.instance.getKeyAttributes()!,
