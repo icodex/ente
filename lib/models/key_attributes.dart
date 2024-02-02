@@ -99,9 +99,4 @@ class KeyAttributes {
       recoveryKeyDecryptionNonce ?? this.recoveryKeyDecryptionNonce,
     );
   }
-
-  @override
-  String toString() {
-    return 'KeyAttributes(kekSalt: $kekSalt, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, publicKey: $publicKey, encryptedSecretKey: $encryptedSecretKey, secretKeyDecryptionNonce: $secretKeyDecryptionNonce, memLimit: $memLimit, opsLimit: $opsLimit, masterKeyEncryptedWithRecoveryKey: $masterKeyEncryptedWithRecoveryKey, masterKeyDecryptionNonce: $masterKeyDecryptionNonce, recoveryKeyEncryptedWithMasterKey: $recoveryKeyEncryptedWithMasterKey, recoveryKeyDecryptionNonce: $recoveryKeyDecryptionNonce)';
-  }
 }
