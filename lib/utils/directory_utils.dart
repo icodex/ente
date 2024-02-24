@@ -6,7 +6,7 @@ class DirectoryUtils {
         [
           (await getApplicationDocumentsDirectory()).path,
           "ente",
-          "auth.$databaseName",
+          ".$databaseName",
         ],
       );
 }
