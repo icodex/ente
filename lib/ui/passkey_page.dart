@@ -12,13 +12,11 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class PasskeyPage extends StatefulWidget {
   final String sessionID;
-  final String userPassword;
   final Uint8List keyEncryptionKey;
 
   const PasskeyPage(
     this.sessionID, {
     Key? key,
-    required this.userPassword,
     required this.keyEncryptionKey,
   }) : super(key: key);
 
@@ -66,7 +64,6 @@ class _PasskeyPageState extends State<PasskeyPage> {
       await UserService.instance.acceptPasskey(
         context,
         json,
-        widget.userPassword,
         widget.keyEncryptionKey,
       );
     }

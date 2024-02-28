@@ -268,9 +268,11 @@ class UserService {
   Future<void> acceptPasskey(
     BuildContext context,
     Map response,
-    String userPassword,
     Uint8List keyEncryptionKey,
   ) async {
+    final userPassword = Configuration.instance.getVolatilePassword();
+    if (userPassword == null) throw Exception("volatile password is null");
+
     await _saveConfiguration(response);
 
     Widget page;
@@ -615,12 +617,12 @@ class UserService {
       final String passkeySessionID = response.data["passkeySessionID"];
       final String twoFASessionID = response.data["twoFactorSessionID"];
       Configuration.instance.setVolatilePassword(userPassword);
+
       if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
       } else if (passkeySessionID.isNotEmpty) {
         page = PasskeyPage(
           passkeySessionID,
-          userPassword: userPassword,
           keyEncryptionKey: keyEncryptionKey,
         );
       } else {
