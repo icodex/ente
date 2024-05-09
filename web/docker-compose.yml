@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - 8081:80
+      - 8082:80
+    environment:
+      ENDPOINT: https://api.ente.io
+      ALBUMS_ENDPOINT: http://api.ente.io
